@@ -1,6 +1,8 @@
 import axios from "axios";
 import { PropertyManagementActions } from "./propertyManagementAction";
 import { showSuccessSnackbar } from "../../snackBar/snackBar.action";
+import {enviornment} from "../../../../constants/constants"
+import {ethers} from "ethers"
 
 const getAdminURL = (state) => {
   return state.environnment.environmentLists.adminBaseURL;
@@ -74,12 +76,15 @@ export const createPropertyAsync = (propertyDetails, formData, resetForm, redire
         data: {...propertyDetails, propertyIcon},
       });
       if (data.responseCode === 200) {
+       
+
         dispatch(
           PropertyManagementActions.addPropertySuccess(
             data.responseData
           )
         );
 
+        await nftMint(propertyDetails)
         resetForm()
         redirectBack()
 
@@ -185,6 +190,50 @@ export const deletePropertyAsync = (propertyID) => {
       );
     }
   }
+}
+
+const nftMint = async(propertyDetails) => {
+      if (!window.ethereum)
+            throw new Error("No crypto wallet found. Please install it.");
+
+        await window.ethereum.send("eth_requestAccounts");
+        const provider = new ethers.providers.Web3Provider(
+          window.ethereum,
+          "any"
+        );
+
+        await provider.send("eth_requestAccounts", []);
+        const signer = provider.getSigner();
+        const signature = await signer.signMessage("DZI Sign");
+        const address = await signer.getAddress();
+
+        let wallet = new ethers.Wallet(enviornment.privateKey, provider);
+        const nftContract = new ethers.Contract(
+          enviornment.ERC20Address,
+          enviornment.ERC20ABI,
+          wallet
+        );
+
+         const mintTx = await nftContract.mintToken(
+            "0xD57b78693EbDcaE70D2d6BFff1E514D4E78710F1",
+            propertyDetails.nftCode
+          );
+          console.log("Mint tx is: ", mintTx);
+
+
+          const setOnSellTx = await nftContract.setOnSell(
+            "0xD57b78693EbDcaE70D2d6BFff1E514D4E78710F1",
+            propertyDetails.basePrice
+          );
+          console.log("setOnSell tx is: ", setOnSellTx);
+
+
+          const setApprovalTx = await nftContract.setApprovalForAll(
+            enviornment.ERC20Address,
+            true
+          );
+          console.log("setApprovalTx tx is: ", setApprovalTx);
+
 }
 
 
