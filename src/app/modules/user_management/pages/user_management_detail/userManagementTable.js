@@ -1,15 +1,17 @@
 import React, { useState } from "react";
-import { Modal } from "react-bootstrap";
+import { Modal, Table } from "react-bootstrap";
 import { useDispatch, useSelector, shallowEqual } from "react-redux";
-import { Table } from "react-bootstrap";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { UserManagementActions } from "../../redux";
 import BasicPagination from "../../../pagination/BasicPagination";
 import { toAbsoluteUrl } from "../../../../../_metronic/_helpers";
 import SVG from "react-inlinesvg";
 import { deleteUserAsync } from "../../redux";
+import { useHistory } from "react-router-dom";
+
 
 const UserManagementTable = ({ onUserDetailsClick }) => {
+  const history = useHistory()
   const [DeleteModal, setDeleteModal] = useState(false);
   const deleteClose = () => setDeleteModal(false);
   const deleteShow = () => setDeleteModal(true);
@@ -151,6 +153,19 @@ const UserManagementTable = ({ onUserDetailsClick }) => {
                               />
                             </span>
                           </a> */}
+                          <a
+                          title="View"
+                          className="btn btn-icon btn-light btn-hover-success btn-sm mr-3"
+                          onClick={() => history.push(`/property-management/${userLists._id}`)}
+                        >
+                          <span className="svg-icon svg-icon-md svg-icon-success">
+                            <SVG
+                              src={toAbsoluteUrl(
+                                "/media/svg/icons/custom/eye.svg"
+                              )}
+                            />
+                          </span>
+                        </a>
                           {userLists.status === "ACTIVE" ? (
                             <a
                               title="Delete"

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Col, Row, Button } from "react-bootstrap";
 import { useParams, Redirect, Link, useHistory } from "react-router-dom";
 import { Formik, Form } from "formik";
@@ -13,7 +13,7 @@ import {
 import * as Yup from "yup";
 import SVG from "react-inlinesvg";
 import { toAbsoluteUrl } from "../../../../_metronic/_helpers";
-import { createPropertyAsync } from "../redux/propertyManagementApi"
+import { createPropertyAsync, getAllPropertiesAsync } from "../redux/propertyManagementApi"
 import { OVRMap } from "./Map";
 
 /* import PlacesAutocomplete, {
@@ -134,6 +134,12 @@ const AddProperty = () => {
     value: "HOT_PROPERTY",
     label: "HOT_PROPERTY",
   }]
+
+  // useEffect(() => {
+  //     dispatch(
+  //       getAllPropertiesAsync()
+  //     );
+  // }, []);
 
 
   return (
@@ -401,7 +407,7 @@ const AddProperty = () => {
                       <label className="form-label">NFT code</label>
                       <input
                         placeholder="Enter NFT code"
-                        type="text"
+                        type="number"
                         name="nftCode"
                         className={
                           errors.nftCode && touched.nftCode

@@ -36,6 +36,11 @@ export default function BasePage() {
           path="/property-management"
           component={PropertyManagement}
         />
+         <ContentRoute
+          exact
+          path="/property-management/:userId"
+          component={PropertyManagement}
+        />
         <ContentRoute
           exact
           path="/add-property"

@@ -8,18 +8,23 @@ const getAdminURL = (state) => {
   return state.environnment.environmentLists.adminBaseURL;
 };
 
+const getUserURL = (state) => {
+  return state.environnment.environmentLists.userBaseURL;
+};
+
 export const getAllPropertyDetailsAsync = (
   searchBy,
   searchText,
   searchStatus,
-  dir
+  dir,
+  userID
 ) => {
   return async (dispatch, getState) => {
     try {
       const adminBaseURL = getAdminURL(getState());
-      
       let { _id } = getState().auth.user;
       let { skip, limit } = getState().propertyManagement;
+      
       dispatch(PropertyManagementActions.getAllPropertyDetailsStart());
       const { data } = await axios({
         method: "POST",
@@ -27,7 +32,7 @@ export const getAllPropertyDetailsAsync = (
         headers: {
           "Content-Type": "application/json",
         },
-        //data: {minDate:1643009881, maxDate: 1645688281}
+        data: {userId: userID || ""}
       });
       if (data.responseCode === 200) {
         return dispatch(
@@ -38,7 +43,37 @@ export const getAllPropertyDetailsAsync = (
       return dispatch(
         showSuccessSnackbar("success", data.responseMessage, 3000)
       );
-    } catch (error) {
+    } catch (error) { console.log({error})
+      dispatch(PropertyManagementActions.getAllPropertyDetailsError());
+      dispatch(showSuccessSnackbar("error", "Error while fetching data", 3000));
+    }
+  }
+}
+
+export const getAllPropertiesAsync = () => {
+  return async (dispatch, getState) => {
+    try {
+      const userBaseURL = getUserURL(getState());
+      let { _id } = getState().auth.user;
+      
+      dispatch(PropertyManagementActions.getAllPropertyDetailsStart());
+      const { data } = await axios({
+        method: "GET",
+        url: `${process.env.REACT_APP_HOST}${userBaseURL}/getProperties/${_id}`,
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
+      if (data.responseCode === 200) {
+        return dispatch(
+          PropertyManagementActions.getAllPropertyDetailsSuccess(data.responseData)
+        );
+      }
+      dispatch(PropertyManagementActions.getAllPropertyDetailsError());
+      return dispatch(
+        showSuccessSnackbar("success", data.responseMessage, 3000)
+      );
+    } catch (error) { console.log({error})
       dispatch(PropertyManagementActions.getAllPropertyDetailsError());
       dispatch(showSuccessSnackbar("error", "Error while fetching data", 3000));
     }
@@ -193,47 +228,46 @@ export const deletePropertyAsync = (propertyID) => {
 }
 
 const nftMint = async(propertyDetails) => {
-      if (!window.ethereum)
-            throw new Error("No crypto wallet found. Please install it.");
+  if (!window.ethereum)
+        throw new Error("No crypto wallet found. Please install it.");
 
-        await window.ethereum.send("eth_requestAccounts");
-        const provider = new ethers.providers.Web3Provider(
-          window.ethereum,
-          "any"
-        );
+    await window.ethereum.send("eth_requestAccounts");
+    const provider = new ethers.providers.Web3Provider(
+      window.ethereum,
+      "any"
+    );
 
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        const signature = await signer.signMessage("DZI Sign");
-        const address = await signer.getAddress();
+    await provider.send("eth_requestAccounts", []);
+    const signer = provider.getSigner();
+    const signature = await signer.signMessage("DZI Sign");
+    const address = await signer.getAddress();
 
-        let wallet = new ethers.Wallet(enviornment.privateKey, provider);
-        const nftContract = new ethers.Contract(
-          enviornment.ERC20Address,
-          enviornment.ERC20ABI,
-          wallet
-        );
+    let wallet = new ethers.Wallet(enviornment.privateKey, provider);
+    const nftContract = new ethers.Contract(
+      enviornment.ERC20Address,
+      enviornment.ERC20ABI,
+      signer
+    );
 
-         const mintTx = await nftContract.mintToken(
-            "0xD57b78693EbDcaE70D2d6BFff1E514D4E78710F1",
-            propertyDetails.nftCode
-          );
-          console.log("Mint tx is: ", mintTx);
-
-
-          const setOnSellTx = await nftContract.setOnSell(
-            "0xD57b78693EbDcaE70D2d6BFff1E514D4E78710F1",
-            propertyDetails.basePrice
-          );
-          console.log("setOnSell tx is: ", setOnSellTx);
+     const mintTx = await nftContract.mintToken(
+        "0xD57b78693EbDcaE70D2d6BFff1E514D4E78710F1",
+        propertyDetails.nftCode
+      );
+      console.log("Mint tx is: ", mintTx);
 
 
-          const setApprovalTx = await nftContract.setApprovalForAll(
-            enviornment.ERC20Address,
-            true
-          );
-          console.log("setApprovalTx tx is: ", setApprovalTx);
+      const setOnSellTx = await nftContract.setOnSell(
+        propertyDetails.nftCode,
+        propertyDetails.basePrice
+      );
+      console.log("setOnSell tx is: ", setOnSellTx);
+
+
+      const setApprovalTx = await nftContract.setApprovalForAll(
+        enviornment.ERC20Address,
+        true
+      );
+      console.log("setApprovalTx tx is: ", setApprovalTx);
 
 }
-
 

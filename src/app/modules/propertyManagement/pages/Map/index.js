@@ -16,6 +16,8 @@ export const OVRMap = ({setFieldValue}) => {
   const [isMapReady, setIsMapReady] = useState(false);
   const [lastSelectedLand, setLastSelectedLand] = useState(null);
   const [mapMoveendChange, setMapMoveendChange] = useState(true);
+  const [blockedProperties, setBlockedProperties] = useState([]);
+
 
   const [multipleLandSelectionList, setmultipleLandSelectionList] = useState(
     []

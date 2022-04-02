@@ -394,7 +394,7 @@ const AddProperty = () => {
                                             <label className="form-label">NFT code</label>
                                             <input
                                                 placeholder="Enter NFT code"
-                                                type="text"
+                                                type="number"
                                                 name="nftCode"
                                                 className={
                                                     errors.nftCode && touched.nftCode

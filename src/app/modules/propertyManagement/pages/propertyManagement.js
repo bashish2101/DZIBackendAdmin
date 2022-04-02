@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import PropertyManagementTable from "./propertyManagementTable";
 import Select from "react-select";
 import { useSelector, useDispatch, shallowEqual } from "react-redux";
+import { useParams } from "react-router-dom"
 import {
   Card,
   CardHeader,
@@ -15,6 +16,7 @@ import { PropertyManagementMap } from "../redux/propertyManagementAction"
 
 export const PropertyManagement = () => {
 
+  const {userId} = useParams()
   const [dropDownValue, setDropDownValue] = useState({
     value: "",
     label: "All",
@@ -62,7 +64,7 @@ export const PropertyManagement = () => {
   useEffect(() => {
     if (refreshpropertyDetailsList) {
       dispatch(
-        getAllPropertyDetailsAsync(searchBy, searchText, searchStatus, dir)
+        getAllPropertyDetailsAsync(searchBy, searchText, searchStatus, dir, userId)
       );
     }
   }, [refreshpropertyDetailsList]);
